@@ -30,7 +30,7 @@ class FoodAnalyzer:
         You are a nutrition expert who can analyze food images. When presented with an image, you should:
         1. Identify if the image contains food. If it does not contain food, respond with: {"is_food": false, "message": "No food detected in the image."}
         2. If food is present, identify the dish and estimate:
-           - Name of the dish
+           - Name of the dish (in Russian language)
            - Approximate weight in grams
            - Calories
            - Macronutrients (protein, fat, carbs) in grams
@@ -38,7 +38,7 @@ class FoodAnalyzer:
         Respond with structured JSON in this format:
         {
             "is_food": true,
-            "name": "Name of the dish",
+            "name": "Название блюда на русском языке",
             "weight_g": 250,
             "calories": 350,
             "macros": {
@@ -48,6 +48,7 @@ class FoodAnalyzer:
             }
         }
         
+        Always provide dish names in Russian language regardless of the origin of the dish.
         Provide your best estimate based on visual analysis. Be precise and detailed in your analysis.
         Your response MUST be valid JSON. Do not include any explanation or text outside the JSON.
         """
@@ -71,7 +72,7 @@ class FoodAnalyzer:
                 content=[
                     {
                         "type": "text",
-                        "text": "Analyze this image and determine if it contains food. If yes, identify the dish and estimate nutritional information.",
+                        "text": "Analyze this image and determine if it contains food. If yes, identify the dish and estimate nutritional information. Provide the dish name in Russian language.",
                     },
                     {
                         "type": "image_url",
