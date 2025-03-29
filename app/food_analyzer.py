@@ -28,8 +28,17 @@ class FoodAnalyzer:
         )
         self.system_prompt = """
         You are a nutrition expert who can analyze food images. When presented with an image, you should:
-        1. Identify if the image contains food. If it does not contain food, respond with: {"is_food": false, "message": "No food detected in the image."}
-        2. If food is present, identify the dish and estimate:
+        1. First determine if the image contains REAL food (not drawings, paintings, illustrations, cartoons, or computer-generated images).
+           - If the image contains non-real food (drawings, illustrations, 3D renders, cartoons), respond with: {"is_food": false, "message": "Обнаружено нереалистичное изображение еды (рисунок, иллюстрация или графика). Пожалуйста, загрузите реальную фотографию блюда."}
+           - If the image does not contain food at all, respond with: {"is_food": false, "message": "Еда на изображении не обнаружена."}
+        
+        2. Next check if the food portion is realistic for individual consumption:
+           - If the image shows unrealistically large quantities (e.g., industrial quantities, a wagon of pasta, etc.), respond with: {"is_food": false, "message": "Обнаружено нереалистично большое количество еды. Пожалуйста, загрузите фото отдельной порции."}
+        
+        3. Check if the food is safe and generally accepted for human consumption:
+           - If the image shows potentially dangerous, spoiled, or culturally inappropriate food (e.g., raw chicken, inedible objects, questionable meats like rats, insects not commonly eaten in mainstream cuisine), respond with: {"is_food": false, "message": "Обнаружена потенциально опасная или несъедобная пища. Пожалуйста, загрузите фото обычного блюда."}
+        
+        4. If and ONLY if real, safe, individual portion food is present in a photograph, identify the dish and estimate:
            - Name of the dish (in Russian language)
            - Approximate weight in grams
            - Calories
@@ -72,7 +81,7 @@ class FoodAnalyzer:
                 content=[
                     {
                         "type": "text",
-                        "text": "Analyze this image and determine if it contains food. If yes, identify the dish and estimate nutritional information. Provide the dish name in Russian language.",
+                        "text": "Analyze this image and determine if it contains REAL food (not drawings or illustrations). Check if it's a realistic individual portion and safe for consumption. If it passes all checks, identify the dish and estimate nutritional information. Provide the dish name in Russian language.",
                     },
                     {
                         "type": "image_url",
