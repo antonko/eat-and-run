@@ -15,12 +15,16 @@ logger = logging.getLogger(__name__)
 class FoodAnalyzer:
     """Food image analyzer using LangChain and OpenAI's vision capabilities."""
 
-    def __init__(self):
+    def __init__(self, proxy=None):
+        # Используем переданный прокси или значение из настроек
+        proxy_url = proxy or settings.PROXY_URL
+
         self.llm = ChatOpenAI(
             model=settings.OPENAI_MODEL,
             api_key=settings.OPENAI_API_KEY,
             max_tokens=1000,
             temperature=0,
+            openai_proxy=proxy_url if proxy_url else None,
         )
         self.system_prompt = """
         You are a nutrition expert who can analyze food images. When presented with an image, you should:

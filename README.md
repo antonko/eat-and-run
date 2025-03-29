@@ -32,6 +32,8 @@ uv sync
 ```
 TELEGRAM_BOT_TOKEN=your_telegram_bot_token_here
 OPENAI_API_KEY=your_openai_api_key_here
+# Опционально, для работы через прокси
+PROXY_URL=http://your-proxy:port
 ```
 
 ### Запуск бота
@@ -50,6 +52,10 @@ uv run .\run.py
 
 - `/start` - Начать работу с ботом
 - `/help` - Получить справку по использованию бота
+
+## Особенности
+
+- Поддержка работы через прокси (настраивается через переменную окружения `PROXY_URL`)
 
 # Планы развития
 

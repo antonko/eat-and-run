@@ -28,6 +28,9 @@ class Settings(BaseSettings):
     # OpenAI model to use - изменено для поддержки vision
     OPENAI_MODEL: str = os.getenv("OPENAI_MODEL", "gpt-4-vision-preview")
 
+    # Proxy URL - для работы через прокси
+    PROXY_URL: str = os.getenv("PROXY_URL", "")
+
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
     def check_config(self) -> bool:
@@ -39,6 +42,9 @@ class Settings(BaseSettings):
         if not self.OPENAI_API_KEY:
             logger.error("OPENAI_API_KEY is not set in environment variables")
             return False
+
+        if self.PROXY_URL:
+            logger.info(f"Using proxy: {self.PROXY_URL}")
 
         logger.info(f"Using OpenAI model: {self.OPENAI_MODEL}")
         return True
