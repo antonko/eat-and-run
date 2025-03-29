@@ -1,0 +1,62 @@
+# Git
+.git
+.gitignore
+.github
+
+# Python временные файлы
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Виртуальная среда
+.env
+.venv
+venv/
+ENV/
+
+# Локальные файлы, которые не нужны в контейнере
+.idea/
+.vscode/
+*.swp
+*.swo
+*.swn
+.DS_Store
+
+# Логи и временные файлы
+logs/
+*.log
+temp/
+tmp/
+
+# Файлы Docker
+docker-compose*.yml
+Dockerfile*
+.dockerignore
+
+# Документация и тесты
+docs/
+tests/
+*.md
+!README.md
