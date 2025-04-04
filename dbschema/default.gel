@@ -1,0 +1,10 @@
+module default {
+  type Meal {
+    required name: str;
+    required calories: int64;
+    required proteins: float64;
+    required fats: float64;
+    required carbs: float64;
+    required date: datetime;
+  }
+}

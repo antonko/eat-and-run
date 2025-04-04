@@ -1,0 +1,15 @@
+[project]
+name = "eat-and-run"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "gel>=3.0.1",
+]
+
+[dependency-groups]
+dev = [
+    "gel>=3.0.1",
+    "ruff>=0.11.4",
+]
