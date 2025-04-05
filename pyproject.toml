@@ -1,16 +1,53 @@
 [project]
 name = "eat-and-run"
 version = "0.1.0"
-description = "Add your description here"
+description = "Telegram agent for tracking your sport and nutrition"
 readme = "README.md"
+keywords = ["telegram", "agent", "sport", "nutrition"]
+authors = [
+    { name="Anton Kovalev", email="antonko@gmail.com" }
+]
 requires-python = ">=3.12"
 dependencies = [
+    "aiogram>=3.19.0",
     "gel>=3.0.1",
+    "langchain>=0.3.23",
+    "langchain-community>=0.3.21",
+    "langchain-openai>=0.3.12",
+    "langgraph>=0.3.25",
+    "pydantic>=2.10.6",
     "pydantic-settings>=2.8.1",
 ]
 
 [dependency-groups]
 dev = [
-    "gel>=3.0.1",
+    "mypy>=1.15.0",
     "ruff>=0.11.4",
 ]
+
+[tool.ruff]
+line-length = 99
+indent-width = 4
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = ["T201", "D100", "D107", "ANN101", "TRY002", "TRY003", "EM101", "G004", "RUF", "D104", "D203", "D213", "PGH003", "PLR0913", "EM102", "INP001", "D401", "FIX002", "TD002", "TD003"]
+fixable = ["ALL"]
+unfixable = ["B"]
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["E402"]
+"**/{tests,docs,tools}/*" = ["E402", "F811", "ARG001", "D103", "S101", "PLR2004", "F401", "PLR0913"]
+
+[tool.ruff.lint.flake8-quotes]
+docstring-quotes = "double"
+
+[tool.ruff.lint.flake8-builtins]
+builtins-ignorelist = ["id","type"]
+
+[tool.mypy]
+python_version = "3.12"
+plugins = "pydantic.mypy"
+strict = false

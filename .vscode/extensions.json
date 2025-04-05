@@ -1,0 +1,11 @@
+{
+  "recommendations": [
+    "ms-python.python",
+    "charliermarsh.ruff",
+    "ms-python.mypy-type-checker",
+    "ms-python.vscode-pylance",
+    "ms-toolsai.jupyter",
+    "irongeek.vscode-env",
+    "foxundermoon.shell-format"
+  ]
+}
