@@ -1,6 +1,14 @@
-# GEL
+# Жри и беги
 
-## Run
+## Описание
+
+Бот для телеграмма для отслеживания потребления еды и тренировок
+
+# Development
+
+В качестве базы данных используется gel.
+
+## Запуск базы данных gel
 
 ```bash
 docker compose up
@@ -10,25 +18,20 @@ docker compose up
 
 http://localhost:5656/ui/
 
+* login: test
+* password: test
+
 Миграции
 
 ```bash
-gel migration create --docker
+gel migration create --dsn gel://test:test@localhost:5656/main --tls-security insecure
 ```
 
 ```bash
-gel migrate --docker
+gel migrate --dsn gel://test:test@localhost:5656/main --tls-security insecure
 ```
 
-Заходим в UI
-
-```bash
-gel ui --docker
-```
-
-```bash
-gel --dsn gel://username:oldpass@hostname.com --password qwerty
-```
+Генерация функций
 
 ```bash
 gel-py --dsn gel://test:test@localhost:5656/main --tls-security insecure
