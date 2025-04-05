@@ -3,8 +3,8 @@ services:
     image: geldata/gel
     environment:
       GEL_SERVER_SECURITY: insecure_dev_mode
-    volumes:
-      - "./dbschema:/dbschema"
+      GEL_SERVER_PASSWORD: test
+      GEL_SERVER_USER: test
     ports:
       - "5656:5656"
     command: ["--admin-ui=enabled"]

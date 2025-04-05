@@ -26,3 +26,10 @@ gel migrate --docker
 gel ui --docker
 ```
 
+```bash
+gel --dsn gel://username:oldpass@hostname.com --password qwerty
+```
+
+```bash
+gel-py --dsn gel://test:test@localhost:5656/main --tls-security insecure
+```
