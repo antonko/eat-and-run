@@ -1,7 +1,7 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-class Settings(BaseSettings):
+class Configuration(BaseSettings):
     """Application settings that can be loaded from environment variables."""
 
     # Database configuration
@@ -11,6 +11,11 @@ class Settings(BaseSettings):
     gel_password: str = "test"  # noqa: S105
     gel_branch: str = "main"
     gel_tls_security: str = "strict"
+
+    # LangGraph configuration
+    ai_default_model: str = "openai/gpt-4o-mini"
+    ai_openai_api_key: str = "xxx"
+
     model_config = SettingsConfigDict(
         env_file=(".env", ".env.local"),
         env_file_encoding="utf-8",
@@ -19,4 +24,4 @@ class Settings(BaseSettings):
 
 
 # Create settings instance
-settings = Settings()
+configuration = Configuration()

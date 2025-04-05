@@ -6,6 +6,12 @@
 
 # Development
 
+## LangGraph Server
+
+```bash
+langgraph dev
+```
+
 В качестве базы данных используется gel.
 
 ## Запуск базы данных gel
