@@ -21,18 +21,6 @@ class InputState(BaseModel):
         default_factory=list,
     )
 
-    # Конфигурация для правильной сериализации и десериализации
-    model_config = {
-        "arbitrary_types_allowed": True,  # Разрешаем произвольные типы (для AnyMessage)
-        "json_encoders": {
-            AnyMessage: lambda msg: {
-                "type": msg.type,  # Используем значение поля type, например, "human"
-                "content": msg.content,
-                "additional_kwargs": msg.additional_kwargs,
-            },
-        },
-    }
-
 
 class State(InputState):
     """Represents the complete state of the agent, extending InputState with additional attributes.

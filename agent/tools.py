@@ -27,6 +27,10 @@ async def save_meals(
         carbs: Количество углеводов в блюде (граммы)
         date: Дата и время приема пищи (если не указано, будет использовано текущее время)
     """
+    # Проверка на наличие часового пояса в дате
+    if date.tzinfo is None:
+        date = date.replace(tzinfo=datetime.UTC)
+
     await insert_meals(
         executor=gel_client.gel_client,
         name=name,

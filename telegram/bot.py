@@ -1,3 +1,4 @@
+import base64
 import logging
 
 from aiogram import Bot, Dispatcher
@@ -49,9 +50,61 @@ async def handle_message(message: Message) -> None:
     user_text = message.text
     chat_id = str(message.chat.id)
 
-    if not user_text:
+    # Создаем массив для контента сообщения
+    message_content = []
+
+    # Добавляем текст, если он есть
+    if user_text:
+        message_content.append(
+            {
+                "type": "text",
+                "text": user_text,
+            },
+        )
+    # Если есть caption (подпись к медиа), используем его
+    elif message.caption:
+        message_content.append(
+            {
+                "type": "text",
+                "text": message.caption,
+            },
+        )
+
+    # Обрабатываем фотографии, если они есть
+    if message.photo:
+        # Берем только самое качественное изображение (последнее в массиве)
+        photo = message.photo[-1]
+        file_info = await bot.get_file(photo.file_id)
+
+        # Проверка на существование file_path
+        if not file_info or not file_info.file_path:
+            await message.answer(
+                "Не удалось получить файл изображения. Пожалуйста, попробуйте еще раз.",
+            )
+        else:
+            downloaded_file = await bot.download_file(file_info.file_path)
+
+            # Проверка на существование скачанного файла
+            if not downloaded_file:
+                await message.answer(
+                    "Не удалось скачать изображение. Пожалуйста, попробуйте еще раз.",
+                )
+            else:
+                image_data = downloaded_file.read()
+                base64_image = base64.b64encode(image_data).decode("utf-8")
+
+                # Добавляем изображение в контент сообщения
+                message_content.append(
+                    {
+                        "type": "image_url",
+                        "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"},
+                    },
+                )
+
+    # Если нет ни текста, ни фото, запрашиваем у пользователя отправить сообщение
+    if not message_content:
         await message.answer(
-            "Пожалуйста, отправьте текстовое сообщение.",
+            "Пожалуйста, отправьте текстовое сообщение или фотографию.",
         )
         return
 
@@ -68,7 +121,13 @@ async def handle_message(message: Message) -> None:
         if session_result is None:
             logger.info("Новый пользователь - создаем новую сессию")
             # Новый пользователь - создаем новую сессию
-            input_state = InputState(messages=[HumanMessage(content=user_text)])
+            input_state = InputState(
+                messages=[
+                    HumanMessage(
+                        content=message_content,
+                    ),
+                ],
+            )
             # Используем встроенный метод .model_dump_json() для сериализации
             await insert_session(
                 gel_client.gel_client,
@@ -82,11 +141,15 @@ async def handle_message(message: Message) -> None:
                 # Создаем state из сохраненных данных
                 input_state = InputState.model_validate_json(session_result.messages)
                 # Добавляем новое сообщение пользователя
-                input_state.messages.append(HumanMessage(content=user_text))
-            except Exception as e:
-                logger.error(f"Ошибка при десериализации сообщений: {e}")
+                input_state.messages.append(
+                    HumanMessage(
+                        content=message_content,
+                    ),
+                )
+            except Exception:
+                logger.exception("Ошибка при десериализации сообщений")
                 # Если ошибка десериализации, создаем новую сессию
-                input_state = InputState(messages=[HumanMessage(content=user_text)])
+                input_state = InputState(messages=[HumanMessage(content=message_content)])
 
         # Process the message through the graph
         result = await graph.ainvoke(input_state)
@@ -143,14 +206,14 @@ async def handle_message(message: Message) -> None:
                 chat_id=message.chat.id,
                 message_id=processing_msg.message_id,
             )
-        except Exception as e:
-            logger.error(f"Не удалось удалить сообщение о обработке: {e}")
+        except Exception:
+            logger.exception("Не удалось удалить сообщение о обработке")
 
         # Send the response
         await message.answer(response_text)
 
-    except Exception as e:
-        logger.exception(f"Error processing message: {e}")
+    except Exception:
+        logger.exception("Error processing message")
         await message.answer(
             "Произошла ошибка при обработке сообщения. Пожалуйста, попробуйте еще раз.",
         )
@@ -161,8 +224,8 @@ async def start_bot() -> None:
     try:
         logger.info("Starting the bot...")
         await dp.start_polling(bot)
-    except Exception as e:
-        logger.error(f"Failed to start bot: {e}")
+    except Exception:
+        logger.exception("Failed to start bot")
     finally:
         logger.info("Bot stopped.")
         await bot.session.close()
