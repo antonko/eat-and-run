@@ -2,20 +2,9 @@ import datetime
 from collections.abc import Callable
 from typing import Any
 
-import gel
-
-from common.configuration import configuration
+from common import gel_client
 from queries.get_meals_async_edgeql import GetMealsResult, get_meals
 from queries.insert_meals_async_edgeql import insert_meals
-
-client = gel.create_async_client(
-    host=configuration.gel_host,
-    port=configuration.gel_port,
-    user=configuration.gel_user,
-    password=configuration.gel_password,
-    branch=configuration.gel_branch,
-    tls_security=configuration.gel_tls_security,
-)
 
 
 async def save_meals(
@@ -39,7 +28,7 @@ async def save_meals(
         date: Дата и время приема пищи (если не указано, будет использовано текущее время)
     """
     await insert_meals(
-        executor=client,
+        executor=gel_client.gel_client,
         name=name,
         calories=calories,
         proteins=proteins,
@@ -58,7 +47,7 @@ async def get_all_meals() -> list[GetMealsResult]:
     Возвращает:
         Список объектов GetMealsResult, содержащих информацию о каждом приеме пищи
     """
-    return await get_meals(executor=client)
+    return await get_meals(executor=gel_client.gel_client)
 
 
 TOOLS: list[Callable[..., Any]] = [save_meals, get_all_meals]

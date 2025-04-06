@@ -6,6 +6,14 @@
 
 # Development
 
+## Запуск бота
+
+Но перед этим нужно запустить базу данных gel.
+
+```bash
+uv run run.py
+```
+
 ## LangGraph Server
 
 ```bash
@@ -42,3 +50,10 @@ gel migrate --dsn gel://test:test@localhost:5656/main --tls-security insecure
 ```bash
 gel-py --dsn gel://test:test@localhost:5656/main --tls-security insecure
 ```
+
+## Хранение сессий
+
+Бот поддерживает хранение истории диалогов в базе данных. Это позволяет сохранять контекст разговора между сообщениями.
+
+Для каждого чата в Telegram создается отдельная сессия, которая содержит все сообщения и ответы.
+

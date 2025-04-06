@@ -7,4 +7,13 @@ module default {
     required carbs: float64;
     required date: datetime;
   }
+
+  type Session {
+    required chat_id: str;
+    required messages: json;
+    required created_at: datetime {
+      default := datetime_current();
+    }
+    updated_at: datetime;
+  }
 }

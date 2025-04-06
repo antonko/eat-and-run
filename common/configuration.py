@@ -14,7 +14,10 @@ class Configuration(BaseSettings):
 
     # LangGraph configuration
     ai_default_model: str = "openai/gpt-4o-mini"
-    ai_openai_api_key: str = "xxx"
+    ai_openai_api_key: str
+
+    # Telegram configuration
+    telegram_bot_token: str
 
     model_config = SettingsConfigDict(
         env_file=(".env", ".env.local"),
