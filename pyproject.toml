@@ -9,6 +9,7 @@ authors = [
 ]
 requires-python = ">=3.12"
 dependencies = [
+    "aiofiles>=24.1.0",
     "aiogram>=3.19.0",
     "gel>=3.0.1",
     "langchain>=0.3.23",
@@ -21,6 +22,8 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "devtools>=0.12.2",
+    "ipykernel>=6.29.5",
     "langgraph-cli[inmem]>=0.1.89",
     "mypy>=1.15.0",
     "ruff>=0.11.4",

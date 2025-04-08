@@ -13,7 +13,7 @@ class Configuration(BaseSettings):
     gel_tls_security: str = "strict"
 
     # LangGraph configuration
-    ai_default_model: str = "openai/gpt-4o-mini"
+    ai_default_model: str = "gpt-4o-mini"
     ai_openai_api_key: str
 
     # Telegram configuration

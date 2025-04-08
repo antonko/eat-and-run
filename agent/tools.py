@@ -2,9 +2,29 @@ import datetime
 from collections.abc import Callable
 from typing import Any
 
+from agent.food_analyzer import FoodAnalysis, FoodAnalyzer
+from agent.utils import load_chat_model
 from common import gel_client
+from common.file_repository import get_image
 from queries.get_meals_async_edgeql import GetMealsResult, get_meals
 from queries.insert_meals_async_edgeql import insert_meals
+
+
+async def analyze_image(image_guid: str) -> FoodAnalysis:
+    """Анализирует изображение и возвращает результат анализа.
+
+    Args:
+        image_guid: guid of saved image
+
+    Returns:
+        FoodAnalysis: result of image analysis
+
+    """
+    llm = load_chat_model()
+    food_analyzer = FoodAnalyzer(llm)
+
+    image_data = await get_image(image_guid)
+    return await food_analyzer.analyze_image(image_data)
 
 
 async def save_meals(
@@ -54,4 +74,4 @@ async def get_all_meals() -> list[GetMealsResult]:
     return await get_meals(executor=gel_client.gel_client)
 
 
-TOOLS: list[Callable[..., Any]] = [save_meals, get_all_meals]
+TOOLS: list[Callable[..., Any]] = [save_meals, get_all_meals, analyze_image]

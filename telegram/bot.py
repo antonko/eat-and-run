@@ -1,4 +1,3 @@
-import base64
 import logging
 
 from aiogram import Bot, Dispatcher
@@ -10,6 +9,7 @@ from agent.graph import graph
 from agent.state import InputState, State
 from common import gel_client
 from common.configuration import configuration
+from common.file_repository import save_image
 from queries.get_session_async_edgeql import get_session
 from queries.insert_session_async_edgeql import insert_session
 from queries.update_session_async_edgeql import update_session
@@ -91,13 +91,14 @@ async def handle_message(message: Message) -> None:
                 )
             else:
                 image_data = downloaded_file.read()
-                base64_image = base64.b64encode(image_data).decode("utf-8")
 
-                # Добавляем изображение в контент сообщения
+                # Сохраняем изображение и получаем guid
+                image_guid = await save_image(image_data)
+                # Добавляем информацию о изображении в контент сообщения
                 message_content.append(
                     {
-                        "type": "image_url",
-                        "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"},
+                        "type": "text",
+                        "text": f"image_guid: {image_guid}",
                     },
                 )
 

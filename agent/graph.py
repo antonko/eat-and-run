@@ -1,8 +1,6 @@
-# import logging
-# from http.client import HTTPConnection
+import datetime
 from typing import Literal, cast
 
-# from langchain.globals import set_debug
 from langchain_core.messages import AIMessage
 from langchain_core.runnables import RunnableConfig
 from langgraph.graph import StateGraph
@@ -11,22 +9,6 @@ from langgraph.prebuilt import ToolNode
 from agent.state import InputState, State
 from agent.tools import TOOLS
 from agent.utils import load_chat_model
-from common.configuration import configuration
-
-# Включение детального логирования для httpx и openai
-# set_debug(True)
-# logging.basicConfig(level=logging.DEBUG)
-# HTTPConnection.debuglevel = 1
-
-# loggers = [
-#     logging.getLogger("httpx"),
-#     logging.getLogger("openai"),
-#     logging.getLogger("httpcore"),
-# ]
-
-# for logger in loggers:
-#     logger.setLevel(logging.DEBUG)
-#     logger.addHandler(logging.StreamHandler())
 
 
 async def call_model(
@@ -34,36 +16,25 @@ async def call_model(
     config: RunnableConfig,
 ) -> dict[str, list[AIMessage]]:
     """Вызывает модель для получения ответа."""
-    model = load_chat_model(configuration.ai_default_model).bind_tools(TOOLS)
+    llm = load_chat_model()
+    model = llm.bind_tools(TOOLS)
 
     system_message = """
-        Вы — эксперт по питанию, который может анализировать изображения еды. Когда вам будет представлено изображение, вам нужно:
+    Вы — интеллектуальный помощник по питанию и спорту. Ваша задача — помогать пользователям отслеживать свой рацион и физическое состояние, в том числе анализируя фотографии еды.
 
-    Сначала определить, содержит ли изображение РЕАЛЬНУЮ еду (не рисунки, картины, иллюстрации, мультфильмы или изображения, созданные компьютером).
+    Когда вы получаете изображение, выполните следующие шаги:
+    4. **Если изображение содержит реальную, безопасную и реалистичную порцию еды:**
+       - Определите блюдо (укажите название на русском языке)
+       - Оцените примерный вес в граммах
+       - Оцените калорийность
+       - Определите количество белков, жиров и углеводов (в граммах)
 
-        Если изображение содержит нереальную еду (рисунки, иллюстрации, 3D-рендеры, мультфильмы), сообщите, что это нереальная еда.
+    Всю полученную информацию, включая изображение, следует сохранять в базу данных пользователя **только в том случае, если пользователь не указал иное**.
+    """
 
-        Если на изображении вообще нет еды, ответьте об этом.
-
-    Далее проверьте, является ли порция еды реалистичной для индивидуального потребления:
-
-        Если изображение показывает нереалистично большие количества (например, промышленные количества, вагон пасты и т. д.), сообщите, что это нереалистично.
-    Проверьте, безопасна ли еда и приемлема ли она для употребления человеком:
-
-        Если изображение показывает потенциально опасную, испорченную или культурно неприемлемую еду
-        (например, сырое куриное мясо, несъедобные объекты, сомнительные виды мяса, такие как крысы,
-        насекомые, которые не употребляются в повседневной кухне), сообщите, что это потенциально опасная или несъедобная пища.
-
-    Если и ТОЛЬКО если на фотографии присутствует реальная, безопасная порция еды, идентифицируйте блюдо и оцените:
-
-        Название блюда (на русском языке)
-
-        Примерный вес в граммах
-
-        Калорийность
-
-        Макроэлементы (белки, жиры, углеводы) в граммах"
-   """
+    system_message += (
+        f"\nТекущее время: {datetime.datetime.now(datetime.UTC).strftime('%Y-%m-%d %H:%M:%S')}"
+    )
 
     response = cast(
         "AIMessage",
