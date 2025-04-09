@@ -38,11 +38,11 @@ http://localhost:5656/ui/
 Миграции
 
 ```bash
-gel migration create --dsn gel://test:test@localhost:5656/main --tls-security insecure
+gel migration create --dsn gel://test:test@localhost:5656/main --tls-security insecure --schema-dir ./data/dbschema
 ```
 
 ```bash
-gel migrate --dsn gel://test:test@localhost:5656/main --tls-security insecure
+gel migrate --dsn gel://test:test@localhost:5656/main --tls-security insecure --schema-dir ./data/dbschema
 ```
 
 Генерация функций

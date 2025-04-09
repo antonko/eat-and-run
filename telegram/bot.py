@@ -10,9 +10,9 @@ from agent.state import InputState, State
 from common import gel_client
 from common.configuration import configuration
 from common.file_repository import save_image
-from queries.get_session_async_edgeql import get_session
-from queries.insert_session_async_edgeql import insert_session
-from queries.update_session_async_edgeql import update_session
+from data.queries.get_session_async_edgeql import get_session
+from data.queries.insert_session_async_edgeql import insert_session
+from data.queries.update_session_async_edgeql import update_session
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)

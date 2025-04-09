@@ -6,8 +6,8 @@ from agent.food_analyzer import FoodAnalysis, FoodAnalyzer
 from agent.utils import load_chat_model
 from common import gel_client
 from common.file_repository import get_image
-from queries.get_meals_async_edgeql import GetMealsResult, get_meals
-from queries.insert_meals_async_edgeql import insert_meals
+from data.queries.get_meals_async_edgeql import GetMealsResult, get_meals
+from data.queries.insert_meals_async_edgeql import insert_meals
 
 
 async def analyze_image(image_guid: str) -> FoodAnalysis:
