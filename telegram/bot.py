@@ -10,9 +10,8 @@ from agent.state import InputState, State
 from common import gel_client
 from common.configuration import configuration
 from common.file_repository import save_image
-from data.queries.get_session_async_edgeql import get_session
-from data.queries.insert_session_async_edgeql import insert_session
-from data.queries.update_session_async_edgeql import update_session
+from data.models.users import UserModel
+from data.repositories.user_repository import UserRepository
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -21,6 +20,7 @@ logger = logging.getLogger(__name__)
 # Initialize bot and dispatcher
 bot = Bot(token=configuration.telegram_bot_token)
 dp = Dispatcher()
+user_repository = UserRepository(gel_client.gel_client)
 
 
 @dp.message(Command("start"))
@@ -113,15 +113,16 @@ async def handle_message(message: Message) -> None:
     processing_msg = await message.answer("Обрабатываю ваш запрос...")
 
     try:
-        # Get or create state based on existing conversation
-        session_result = await get_session(
-            gel_client.gel_client,
-            chat_id=chat_id,
-        )
+        # Получаем или создаем пользователя
+        user = await user_repository.get_user_by_chat_id(chat_id)
 
-        if session_result is None:
-            logger.info("Новый пользователь - создаем новую сессию")
-            # Новый пользователь - создаем новую сессию
+        if not user:
+            # Новый пользователь - создаем запись
+            logger.info("Новый пользователь - создаем запись")
+            new_user = UserModel(chat_id=chat_id)
+            user = await user_repository.create_user(new_user)
+
+            # Создаем новую сессию для нового пользователя
             input_state = InputState(
                 messages=[
                     HumanMessage(
@@ -129,18 +130,17 @@ async def handle_message(message: Message) -> None:
                     ),
                 ],
             )
-            # Используем встроенный метод .model_dump_json() для сериализации
-            await insert_session(
-                gel_client.gel_client,
-                chat_id=chat_id,
-                messages=input_state.model_dump_json(),
-            )
+            # Создаем и сохраняем новую сессию
+            user.state = input_state.model_dump_json()
+            await user_repository.update_user(user)
         else:
-            # Существующий пользователь - восстанавливаем сессию
+            # Существующий пользователь - обновляем статистику
+            user.interaction_count += 1
+            user = await user_repository.update_user(user)
+
             # Десериализуем сохраненные сообщения
             try:
-                # Создаем state из сохраненных данных
-                input_state = InputState.model_validate_json(session_result.messages)
+                input_state = InputState.model_validate_json(user.state)
                 # Добавляем новое сообщение пользователя
                 input_state.messages.append(
                     HumanMessage(
@@ -151,11 +151,12 @@ async def handle_message(message: Message) -> None:
                 logger.exception("Ошибка при десериализации сообщений")
                 # Если ошибка десериализации, создаем новую сессию
                 input_state = InputState(messages=[HumanMessage(content=message_content)])
+                user.state = input_state.model_dump_json()
 
         # Process the message through the graph
         result = await graph.ainvoke(input_state)
 
-        logger.info(f"Result: {result}")
+        # logger.info(f"Result: {result}")
 
         # Get the AI response from the result
         response_text = (
@@ -171,19 +172,13 @@ async def handle_message(message: Message) -> None:
             if hasattr(result, "messages"):
                 # Создаем State из результата для правильной сериализации
                 state_obj = State(messages=result.messages)
-                await update_session(
-                    gel_client.gel_client,
-                    chat_id=chat_id,
-                    messages=state_obj.model_dump_json(),
-                )
+                user.state = state_obj.model_dump_json()
+                await user_repository.update_user(user)
             elif isinstance(result, dict) and "messages" in result:
                 # Создаем State из результата для правильной сериализации
                 state_obj = State(messages=result["messages"])
-                await update_session(
-                    gel_client.gel_client,
-                    chat_id=chat_id,
-                    messages=state_obj.model_dump_json(),
-                )
+                user.state = state_obj.model_dump_json()
+                await user_repository.update_user(user)
         elif hasattr(result, "messages") and result.messages:
             # Get the last AI message
             ai_message = result.messages[-1]
@@ -191,11 +186,8 @@ async def handle_message(message: Message) -> None:
 
             # Update the session
             state_obj = State(messages=result.messages)
-            await update_session(
-                gel_client.gel_client,
-                chat_id=chat_id,
-                messages=state_obj.model_dump_json(),
-            )
+            user.state = state_obj.model_dump_json()
+            await user_repository.update_user(user)
         elif hasattr(result, "output"):
             response_text = result.output
         elif isinstance(result, dict) and "output" in result:

@@ -1,19 +1,108 @@
 module default {
+  # Типы тренировок
+  scalar type WorkoutType extending enum<
+    'RUNNING',            # Бег, включая трусцой
+    'WALKING',            # Ходьба, пеший туризм
+    'CYCLING',            # Велосипед
+    'SWIMMING',           # Плавание и другие водные
+    'STRENGTH_TRAINING',  # Силовые тренировки
+    'FLEXIBILITY',        # Йога, растяжка, пилатес
+    'TEAM_SPORTS',        # Командные виды спорта
+    'MARTIAL_ARTS',       # Боевые искусства
+    'WINTER_SPORTS',      # Зимние виды спорта
+    'OTHER'               # Другое
+  >;
+
+  type Photo {
+    required file_data: bytes;
+    required file_name: str;
+    required mime_type: str;
+    required created_at: datetime {
+      default := datetime_current();
+    }
+    description: str;
+    link user: User {
+      on target delete delete source;
+    }
+  }
+
+  type Workout {
+    required name: str;
+    required workout_type: WorkoutType;
+    required duration_minutes: int32;
+    required calories_burned: int64;
+    required workout_date: datetime;
+    required created_at: datetime {
+      default := datetime_current();
+    }
+    # Дополнительные поля для бега
+    distance_km: float64;
+    pace_min_per_km: float64;
+    
+    link user: User {
+      on target delete delete source;
+    }
+    link photo: Photo;
+  }
+
   type Meal {
     required name: str;
     required calories: int64;
     required proteins: float64;
     required fats: float64;
     required carbs: float64;
-    required date: datetime;
+    required weight: float64;
+    required consumed_at: datetime;
+    required created_at: datetime {
+      default := datetime_current();
+    }
+    required is_junk_food: bool {
+      default := false;
+    }
+    link user: User {
+      on target delete delete source;
+    }
+    link photo: Photo;
   }
 
-  type Session {
-    required chat_id: str;
-    required messages: json;
+  type Memory {
+    required content: str;
+    required importance: int16 {
+      default := 1;
+    };
     required created_at: datetime {
       default := datetime_current();
     }
     updated_at: datetime;
+    link user: User {
+      on target delete delete source;
+    }
   }
+
+  type User {
+    required chat_id: str {
+      constraint exclusive;
+    }
+    required created_at: datetime {
+      default := datetime_current();
+    }
+    last_interaction_date: datetime;
+    interaction_count: int64 {
+      default := 0;
+    }
+    required state: json;
+    multi link memories: Memory {
+      on source delete delete target;
+    }
+    multi link meals: Meal {
+      on source delete delete target;
+    }
+    multi link workouts: Workout {
+      on source delete delete target;
+    }
+    multi link photos: Photo {
+      on source delete delete target;
+    }
+  }
+
 }
