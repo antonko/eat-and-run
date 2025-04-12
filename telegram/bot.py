@@ -1,3 +1,4 @@
+import base64
 import logging
 
 from aiogram import Bot, Dispatcher
@@ -9,8 +10,9 @@ from agent.graph import graph
 from agent.state import InputState, State
 from common import gel_client
 from common.configuration import configuration
-from common.file_repository import save_image
+from data.models.photos import PhotoModel
 from data.models.users import UserModel
+from data.repositories.photo_repository import PhotoRepository
 from data.repositories.user_repository import UserRepository
 
 # Configure logging
@@ -21,6 +23,7 @@ logger = logging.getLogger(__name__)
 bot = Bot(token=configuration.telegram_bot_token)
 dp = Dispatcher()
 user_repository = UserRepository(gel_client.gel_client)
+photo_repository = PhotoRepository(gel_client.gel_client)
 
 
 @dp.message(Command("start"))
@@ -91,14 +94,29 @@ async def handle_message(message: Message) -> None:
                 )
             else:
                 image_data = downloaded_file.read()
+                image_data_base64 = base64.b64encode(image_data).decode("utf-8")
 
-                # Сохраняем изображение и получаем guid
-                image_guid = await save_image(image_data)
+                # Получаем или создаем пользователя для привязки фотографии
+                user = await user_repository.get_user_by_chat_id(chat_id)
+                if not user:
+                    # Новый пользователь - создаем запись
+                    new_user = UserModel(chat_id=chat_id)
+                    user = await user_repository.create_user(new_user)
+
+                # Сохраняем фото в репозитории
+                photo_model = PhotoModel(
+                    file_data_base64=image_data_base64,
+                    file_name=f"{photo.file_id}.jpg",
+                    mime_type="image/jpeg",
+                    user_id=str(user.id),
+                )
+                saved_photo = await photo_repository.save_photo(photo_model)
+
                 # Добавляем информацию о изображении в контент сообщения
                 message_content.append(
                     {
                         "type": "text",
-                        "text": f"image_guid: {image_guid}",
+                        "text": f"photo_id_int: {saved_photo.id_int}",
                     },
                 )
 
@@ -129,6 +147,7 @@ async def handle_message(message: Message) -> None:
                         content=message_content,
                     ),
                 ],
+                user_id=user.id,
             )
             # Создаем и сохраняем новую сессию
             user.state = input_state.model_dump_json()
@@ -140,7 +159,12 @@ async def handle_message(message: Message) -> None:
 
             # Десериализуем сохраненные сообщения
             try:
-                input_state = InputState.model_validate_json(user.state)
+                # Проверяем, является ли state строкой или словарем
+                if isinstance(user.state, dict):
+                    input_state = InputState.model_validate(user.state)
+                else:
+                    input_state = InputState.model_validate_json(user.state)
+
                 # Добавляем новое сообщение пользователя
                 input_state.messages.append(
                     HumanMessage(
@@ -154,9 +178,9 @@ async def handle_message(message: Message) -> None:
                 user.state = input_state.model_dump_json()
 
         # Process the message through the graph
-        result = await graph.ainvoke(input_state)
-
-        # logger.info(f"Result: {result}")
+        result = await graph.ainvoke(
+            input_state,
+        )
 
         # Get the AI response from the result
         response_text = (
@@ -171,12 +195,12 @@ async def handle_message(message: Message) -> None:
             # Update the session with all messages
             if hasattr(result, "messages"):
                 # Создаем State из результата для правильной сериализации
-                state_obj = State(messages=result.messages)
+                state_obj = State(messages=result.messages, user_id=user.id)
                 user.state = state_obj.model_dump_json()
                 await user_repository.update_user(user)
             elif isinstance(result, dict) and "messages" in result:
                 # Создаем State из результата для правильной сериализации
-                state_obj = State(messages=result["messages"])
+                state_obj = State(messages=result["messages"], user_id=user.id)
                 user.state = state_obj.model_dump_json()
                 await user_repository.update_user(user)
         elif hasattr(result, "messages") and result.messages:
@@ -185,7 +209,7 @@ async def handle_message(message: Message) -> None:
             response_text = ai_message.content
 
             # Update the session
-            state_obj = State(messages=result.messages)
+            state_obj = State(messages=result.messages, user_id=user.id)
             user.state = state_obj.model_dump_json()
             await user_repository.update_user(user)
         elif hasattr(result, "output"):

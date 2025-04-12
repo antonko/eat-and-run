@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Annotated
 from uuid import UUID
 
-from pydantic import BaseModel, Field, Json
+from pydantic import BaseModel, Field, Json, field_validator
 
 
 class MemoryModel(BaseModel):
@@ -62,3 +62,13 @@ class UserModel(BaseModel):
         list[MemoryModel],
         Field(default_factory=list, description="Список воспоминаний пользователя"),
     ]
+
+    @field_validator("state", mode="before")
+    @classmethod
+    def validate_state(cls, value) -> Json:  # noqa: ANN001
+        """Преобразует dict в JSON-строку, если это необходимо."""
+        import json
+
+        if isinstance(value, dict):
+            return json.dumps(value)
+        return value

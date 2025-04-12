@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from typing import Annotated
+from uuid import UUID
 
 from langchain_core.messages import (
     AnyMessage,
@@ -20,6 +21,7 @@ class InputState(BaseModel):
     messages: Annotated[Sequence[AnyMessage], add_messages] = Field(
         default_factory=list,
     )
+    user_id: UUID
 
 
 class State(InputState):

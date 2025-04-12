@@ -25,10 +25,12 @@ class UserRepository:
         }
         filter .chat_id = <str>$chat_id
         """
-        result = await self.executor.query_single(query, chat_id=chat_id)
-        if not result:
+        result = await self.executor.query_single_json(query, chat_id=chat_id)
+
+        if result is None or result == "null":
             return None
-        return result
+
+        return UserModel.model_validate_json(result, strict=False)
 
     async def create_user(self, user: UserModel) -> UserModel:
         """Создать нового пользователя."""
@@ -57,12 +59,18 @@ class UserRepository:
             state
         }
         """
-        return await self.executor.query_single(
+        # Убедимся, что state - это строка JSON
+        state_json = user.state
+        if not isinstance(state_json, str):
+            state_json = json.dumps(state_json)
+
+        result = await self.executor.query_single_json(
             query,
             chat_id=user.chat_id,
             interaction_count=user.interaction_count,
-            state=json.dumps(user.state),
+            state=state_json,
         )
+        return UserModel.model_validate_json(result, strict=False)
 
     async def update_user(self, user: UserModel) -> UserModel:
         """Обновить пользователя."""
@@ -85,10 +93,17 @@ class UserRepository:
         )
         { ** }
         """
-        return await self.executor.query_single(
+        # Убедимся, что state - это строка JSON
+        state_json = user.state
+        if not isinstance(state_json, str):
+            state_json = json.dumps(state_json)
+
+        result = await self.executor.query_single_json(
             query,
             id=user.id,
             chat_id=user.chat_id,
             interaction_count=user.interaction_count,
-            state=json.dumps(user.state),
+            state=state_json,
         )
+
+        return UserModel.model_validate_json(result, strict=False)

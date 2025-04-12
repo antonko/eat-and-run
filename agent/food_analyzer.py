@@ -1,4 +1,3 @@
-import base64
 import logging
 
 from langchain.schema import HumanMessage, SystemMessage
@@ -66,7 +65,7 @@ class FoodAnalyzer:
         Будьте точны и объективны в оценках. Если не уверены в каких-то параметрах, укажите это в поле confidence.
         """
 
-    async def analyze_image(self, image_data: bytes) -> FoodAnalysis:
+    async def analyze_image(self, base64_image: str) -> FoodAnalysis:
         """Analyze a food image and return nutritional information.
 
         Args:
@@ -77,9 +76,6 @@ class FoodAnalyzer:
 
         """
         try:
-            # Encode image as base64
-            base64_image = base64.b64encode(image_data).decode("utf-8")
-
             # Create the message with the image
             human_message = HumanMessage(
                 content=[

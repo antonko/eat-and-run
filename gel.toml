@@ -2,3 +2,6 @@ watch = []
 
 [instance]
 server-version = "6.4"
+
+[project]
+schema-dir = "data/schema"

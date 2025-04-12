@@ -12,9 +12,13 @@ class PhotoModel(BaseModel):
         UUID | None,
         Field(default=None, description="Уникальный идентификатор фотографии"),
     ]
-    file_data: Annotated[
-        bytes,
-        Field(description="Бинарные данные файла фотографии"),
+    id_int: Annotated[
+        int | None,
+        Field(default=None, description="Целочисленный идентификатор фотографии"),
+    ]
+    file_data_base64: Annotated[
+        str,
+        Field(description="Бинарные данные файла фотографии в формате base64"),
     ]
     file_name: Annotated[
         str,
@@ -33,6 +37,6 @@ class PhotoModel(BaseModel):
         Field(default=None, description="Описание фотографии"),
     ]
     user_id: Annotated[
-        str | None,
+        UUID | None,
         Field(default=None, description="Идентификатор пользователя, загрузившего фотографию"),
     ]

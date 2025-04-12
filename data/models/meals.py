@@ -49,10 +49,10 @@ class MealModel(BaseModel):
         Field(default=False, description="Флаг нездоровой пищи"),
     ]
     user_id: Annotated[
-        str | None,
+        UUID | None,
         Field(default=None, description="Идентификатор пользователя, сделавшего прием пищи"),
     ]
     photo_id: Annotated[
-        str | None,
+        UUID | None,
         Field(default=None, description="Идентификатор связанной фотографии"),
     ]

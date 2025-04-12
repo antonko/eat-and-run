@@ -13,8 +13,13 @@ module default {
     'OTHER'               # Другое
   >;
 
+  scalar type PhotoNumber extending sequence;
+
   type Photo {
-    required file_data: bytes;
+    required id_int: PhotoNumber {
+      constraint exclusive;
+    }
+    required file_data_base64: str;
     required file_name: str;
     required mime_type: str;
     required created_at: datetime {
