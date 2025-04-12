@@ -2,7 +2,7 @@ from uuid import UUID
 
 import gel
 
-from data.models.meals import MealModel
+from database.models.meals import MealModel
 
 
 class MealRepository:

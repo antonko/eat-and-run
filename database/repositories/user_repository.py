@@ -2,7 +2,7 @@ import json
 
 import gel
 
-from data.models.users import UserModel
+from database.models.users import UserModel
 
 
 class UserRepository:

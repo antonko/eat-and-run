@@ -9,9 +9,9 @@ from langgraph.prebuilt import InjectedState
 from agent.food_analyzer import FoodAnalysis, FoodAnalyzer
 from agent.utils import load_chat_model
 from common import gel_client
-from data.models.meals import MealModel
-from data.repositories.meal_repository import MealRepository
-from data.repositories.photo_repository import PhotoRepository
+from database.models.meals import MealModel
+from database.repositories.meal_repository import MealRepository
+from database.repositories.photo_repository import PhotoRepository
 
 logger = logging.getLogger(__name__)
 

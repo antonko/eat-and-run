@@ -10,10 +10,10 @@ from agent.graph import graph
 from agent.state import InputState, State
 from common import gel_client
 from common.configuration import configuration
-from data.models.photos import PhotoModel
-from data.models.users import UserModel
-from data.repositories.photo_repository import PhotoRepository
-from data.repositories.user_repository import UserRepository
+from database.models.photos import PhotoModel
+from database.models.users import UserModel
+from database.repositories.photo_repository import PhotoRepository
+from database.repositories.user_repository import UserRepository
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)

@@ -1,6 +1,6 @@
 import gel
 
-from data.models.photos import PhotoModel
+from database.models.photos import PhotoModel
 
 
 class PhotoRepository:
